@@ -44,7 +44,7 @@ function goTo(tX,tY,tZ)
   if x > tX then
     faceDirection(1)
     while x ~= tX do
-      x,y,z = gps.locate()
+      x = x - 1
       if turtle.detect() then
         turtle.dig()
       end
@@ -55,7 +55,7 @@ function goTo(tX,tY,tZ)
   if x < tX then
     faceDirection(3)
     while x ~= tX do
-      x,y,z = gps.locate()
+      x = x + 1
       if turtle.detect() then
         turtle.dig()
       end
@@ -66,7 +66,7 @@ function goTo(tX,tY,tZ)
   if z > tZ then
     faceDirection(2)
     while z ~= tZ do
-      x,y,z = gps.locate()
+      z = z - 1
       if turtle.detect() then
         turtle.dig()
       end
@@ -77,7 +77,7 @@ function goTo(tX,tY,tZ)
   if z < tZ then
     faceDirection(4)
     while z ~= tZ do
-      x,y,z = gps.locate()
+      z = z + 1
       if turtle.detect() then
         turtle.dig()
       end
@@ -87,7 +87,7 @@ function goTo(tX,tY,tZ)
   end
   if y > tY then
     while y ~= tY do
-      x,y,z = gps.locate()
+      y = y - 1
       if turtle.detectDown() then
         turtle.digDown()
       end
@@ -97,7 +97,7 @@ function goTo(tX,tY,tZ)
   end
   if y < tY then
     while y ~= tY do
-      x,y,z = gps.locate()
+      y = y + 1
       if turtle.detectUp() then
         turtle.digUp()
       end
