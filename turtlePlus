@@ -40,9 +40,6 @@ function faceDirection(tF)
 end
 
 function goTo(tX,tY,tZ)
-  tX = tX + 1
-  tY = tY + 1
-  tZ = tZ + 1
   x,y,z = gps.locate()
   if x > tX then
     faceDirection(1)
