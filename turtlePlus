@@ -27,6 +27,9 @@ function faceDirection(tF)
   local f = orient()
   repeat
     f = f + 1
+    if f >= 4 then
+      f = 1
+    end
     turtle.turnRight()
   until f == tF
 end
