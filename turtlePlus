@@ -1,0 +1,141 @@
+-- TurtlePlus by jakemroman
+
+if not peripheral.find("modem") then
+  printError("Modem is required to run TurtlePlus")
+  return false
+end
+
+if not gps.locate() then
+  printError("Unable to attain a GPS lock!")
+  return false
+end
+
+function getOrientation()
+loc1 = vector.new(gps.locate(2, false))
+if not turtle.forward() then
+    turtle.dig()
+    turtle.attack()
+    turtle.forward()
+end
+loc2 = vector.new(gps.locate(2, false))
+heading = loc2 - loc1
+turtle.back()
+return ((heading.x + math.abs(heading.x) * 2) + (heading.z + math.abs(heading.z) * 3))
+end
+
+orient = getOrientation()
+
+nativeTurtle = turtle
+
+function turtle.turnRight()
+  nativeTurtle.turnRight()
+  orient = orient + 1
+end
+function turtle.turnLeft()
+  natuveTurtle.turnLeft()
+  orient = orient - 1
+end
+
+function faceDirection(tF)
+  local f = orient
+  repeat
+    f = f + 1
+    turtle.turnRight()
+  until f == tF
+end
+
+function goTo(tX,tY,tZ)
+  x,y,z = gps.locate()
+  if x > tX then
+    faceDirection(1)
+    while x ~= tX do
+      x,y,z = gps.locate()
+      if turtle.detect() then
+        turtle.dig()
+      end
+      turtle.attack()
+      turtle.forward()
+    end
+  end
+  if x < tX then
+    faceDirection(3)
+    while x ~= tX do
+      x,y,z = gps.locate()
+      if turtle.detect() then
+        turtle.dig()
+      end
+      turtle.attack()
+      turtle.forward()
+    end
+  end
+  if z > tZ then
+    faceDirection(2)
+    while z ~= tZ do
+      x,y,z = gps.locate()
+      if turtle.detect() then
+        turtle.dig()
+      end
+      turtle.attack()
+      turtle.forward()
+    end
+  end
+  if z < tZ then
+    faceDirection(4)
+    while z ~= tZ do
+      x,y,z = gps.locate()
+      if turtle.detect() then
+        turtle.dig()
+      end
+      turtle.attack()
+      turtle.forward()
+    end
+  end
+  if y > tY then
+    while y ~= tY do
+      x,y,z = gps.locate()
+      if turtle.detectDown() then
+        turtle.digDown()
+      end
+      turtle.attackDown()
+      turtle.down()
+    end
+  end
+  if y < tY then
+    while y ~= tY do
+      x,y,z = gps.locate()
+      if turtle.detectUp() then
+        turtle.digUp()
+      end
+      turtle.attackUp()
+      turtle.up()
+    end
+  end
+end
+
+function saveData()
+  f = fs.open("/.turtleData","w")
+  f.writeLine(textutils.serialise(turtleData))
+  f.close()
+end
+
+if not fs.exists("/.turtleData") then
+  turtleData = {}
+  local x,y,z = gps.locate()
+  local f = orient
+  turtleData["home"] = {
+    x = x,
+    y = y,
+    z = z,
+    f = f,
+  }
+  saveData()
+else
+  f = fs.open("/.turtleData","r")
+  turtleData = textutils.unserialise(f.readAll())
+  f.close()
+end
+
+function goHome()
+  goTo(turtleData["home"]["x"],turtleData["home"]["y"],turtleData["home"]["z"])
+  faceDirection(turtleData["home"]["f"])
+end
