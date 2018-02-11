@@ -12,11 +12,16 @@ end
 
 function orient()
 loc1 = vector.new(gps.locate(2, false))
-if not turtle.forward() then
-    turtle.dig()
-    turtle.attack()
-    turtle.forward()
+for i=1,4 do
+  if turtle.detect() then
+    turtle.turnRight()
+  else
+    break
+  end
 end
+turtle.dig()
+turtle.attack()
+turtle.forward()
 loc2 = vector.new(gps.locate(2, false))
 heading = loc2 - loc1
 turtle.back()
@@ -35,6 +40,9 @@ function faceDirection(tF)
 end
 
 function goTo(tX,tY,tZ)
+  tX = tX + 1
+  tY = tY + 1
+  tZ = tZ + 1
   x,y,z = gps.locate()
   if x > tX then
     faceDirection(1)
