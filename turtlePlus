@@ -10,7 +10,7 @@ if not gps.locate() then
   return false
 end
 
-function getOrientation()
+function orient()
 loc1 = vector.new(gps.locate(2, false))
 if not turtle.forward() then
     turtle.dig()
@@ -23,21 +23,8 @@ turtle.back()
 return ((heading.x + math.abs(heading.x) * 2) + (heading.z + math.abs(heading.z) * 3))
 end
 
-orient = getOrientation()
-
-nativeTurtle = turtle
-
-function turtle.turnRight()
-  nativeTurtle.turnRight()
-  orient = orient + 1
-end
-function turtle.turnLeft()
-  natuveTurtle.turnLeft()
-  orient = orient - 1
-end
-
 function faceDirection(tF)
-  local f = orient
+  local f = orient()
   repeat
     f = f + 1
     turtle.turnRight()
@@ -121,7 +108,7 @@ end
 if not fs.exists("/.turtleData") then
   turtleData = {}
   local x,y,z = gps.locate()
-  local f = orient
+  local f = orient()
   turtleData["home"] = {
     x = x,
     y = y,
