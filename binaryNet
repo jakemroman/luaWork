@@ -47,7 +47,7 @@ function receive()
             else
                 byte = byte.."0"
             end
-            sleep(0.2)
+            sleep(0.1)
         end
         byte = tonumber(byte)
         dec = bin2Dec(byte)
@@ -76,12 +76,12 @@ function transmit(msg,continue)
             elseif bit == "0" then
                 rs.setOutput(openSide,false)
             end
-            sleep(0.2)
+            sleep(0.1)
         end
     end
-    for i=1,8 do
+    for i=1,10 do
         rs.setOutput(openSide,true)
-        sleep(0.2)
+        sleep(0.1)
     end
     rs.setOutput(openSide,false)
 end
