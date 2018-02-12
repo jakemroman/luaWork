@@ -1,10 +1,36 @@
 -- TurtlePlus by jakemroman (main API)
 -- GPI by LemonJelly (integrated API)
 
-_G["gpi"] = {}
-North,South,West,East,Invalid = 0,1,2,3,-1
-gpi.direction = -1
-gpi.location = {0,0,0}
+function saveData()
+  turtleData["gpi"] = gpi
+  f = fs.open("/.turtleData","w")
+  f.writeLine(textutils.serialise(turtleData))
+  f.close()
+end
+
+if not fs.exists("/.turtleData") then
+  turtleData = {}
+  local x,y,z = gpi.locate()
+  local f = gpi.getDirection()
+  turtleData["home"] = {
+    x = x,
+    y = y,
+    z = z,
+    f = f,
+  }
+  turtleData["gpi"] = {}
+  gpi = {}
+  North,South,West,East,Invalid = 0,1,2,3,-1
+  gpi.direction = -1
+  gpi.location = {0,0,0}
+  saveData()
+else
+  f = fs.open("/.turtleData","r")
+  turtleData = textutils.unserialise(f.readAll())
+  f.close()
+  gpi = turtleData["gpi"]
+end
+
 function gpi.locate(x,y,z)
   if x == nil then
     x2, y2, z2 = gps.locate(5)
@@ -277,29 +303,6 @@ function goTo(tX,tY,tZ)
       turtle.up()
     end
   end
-end
-
-function saveData()
-  f = fs.open("/.turtleData","w")
-  f.writeLine(textutils.serialise(turtleData))
-  f.close()
-end
-
-if not fs.exists("/.turtleData") then
-  turtleData = {}
-  local x,y,z = gpi.locate()
-  local f = gpi.getDirection()
-  turtleData["home"] = {
-    x = x,
-    y = y,
-    z = z,
-    f = f,
-  }
-  saveData()
-else
-  f = fs.open("/.turtleData","r")
-  turtleData = textutils.unserialise(f.readAll())
-  f.close()
 end
 
 function goHome()
