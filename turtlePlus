@@ -211,12 +211,6 @@ function gpi.setDirection(dire)
   end
 end
 
-if not fs.exists("/gpi") then
-  shell.run("pastebin get Yh0wCDKL /gpi")
-end
-
-os.loadAPI("/gpi")
-
 function goTo(tX,tY,tZ)
   x,y,z = gpi.locate()
   if x > tX then
