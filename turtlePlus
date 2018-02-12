@@ -1,4 +1,215 @@
--- TurtlePlus by jakemroman
+-- TurtlePlus by jakemroman (main API)
+-- GPI by LemonJelly (integrated API)
+
+_G["gpi"] = {}
+North,South,West,East,Invalid = 0,1,2,3,-1
+gpi.direction = -1
+gpi.location = {0,0,0}
+function gpi.locate(x,y,z)
+  if x == nil then
+    x2, y2, z2 = gps.locate(5)
+    if x2 then
+      oldTForward()
+      local x3, y3, z3 = gps.locate(5)
+      if x3 then
+        if x3 ~= x2 then
+          if x3 > x2 then
+            gpi.direction = 3
+          else
+            gpi.direction = 2
+          end
+        else
+          if z3 ~= z2 then
+            if z3 > z2 then
+              gpi.direction = 1
+            else
+              gpi.direction = -1
+            end
+          else
+            gpi.direction = -1
+          end
+        end
+      end
+    end
+  elseif y == nil then
+    error("Error: 3 or 0 Coordinates required.")
+  end
+  turtle.back()
+  gpi.location[1] = x2
+  gpi.location[2] = y2
+  gpi.location[3] = z2
+  return x2, y2, z2, gpi.direction
+end
+oldTForward = turtle.forward
+gpi.locate()
+function gpi.forward()
+  if turtle.getFuelLevel() == "unlimited" or turtle.getFuelLevel <= 1 then
+  if gpi.direction > -1 and gpi.direction < 4 then
+  if oldTForward() then
+    if gpi.direction == 0 then
+      gpi.location[3] = gpi.location[3] - 1
+      oldTForward()
+    elseif gpi.direction == 1 then
+      gpi.location[3] = gpi.location[3] + 1
+      oldTForward()
+    elseif gpi.direction == 2 then
+      gpi.location[1] = gpi.location[1] - 1
+      oldTForward()
+    elseif gpi.direction == 3 then
+      gpi.location[1] = gpi.location[1] + 1
+      oldTForward()
+    end
+    return gpi.location[1], gpi.location[2], gpi.location[3]
+  else
+    return false
+  end
+  else
+    return false
+  end
+  else
+    return false
+  end
+end
+turtle.forward = gpi.forward
+
+function gpi.restore()
+  turtle.forward = oldTForward
+  turtle.back = oldTBack
+  turtle.turnLeft = oldTLeft
+  turtle.turnRight = oldTRight
+  turtle.up = oldTUp
+  turtle.down = oldTDown
+end
+
+oldTLeft = turtle.turnLeft
+function gpi.turnLeft()
+  if gpi.direction > -1 and gpi.direction < 4 then
+    if gpi.direction == 0 then
+      gpi.direction = 2
+      oldTLeft()
+    elseif gpi.direction == 1 then
+      gpi.direction = 3
+      oldTLeft()
+    elseif gpi.direction == 2 then
+      gpi.direction = 1
+      oldTLeft()
+    elseif gpi.direction == 3 then
+      gpi.direction = 0
+      oldTLeft()
+    end
+    return gpi.direction
+  else
+    return false
+  end
+end
+turtle.turnLeft = gpi.turnLeft
+oldTRight = turtle.turnRight()
+function gpi.turnRight()
+  if gpi.direction > -1 and gpi.direction < 4 then
+    if gpi.direction == 0 then
+      gpi.direction = 3
+      oldTRight()
+    elseif gpi.direction == 1 then
+      gpi.direction = 2
+      oldTRight()
+    elseif gpi.direction == 2 then
+      gpi.direction = 0
+      oldTRight()
+    elseif gpi.direciton == 3 then
+      gpi.direction = 1
+      oldTRight()
+    end
+    return gpi.direction
+  else
+    return false
+  end
+end
+turtle.turnRight = gpi.turnRight
+oldTBack = turtle.back
+function gpi.back()
+  if turtle.getFuelLevel() == "unlimited" or turtle.getFuelLevel() >= 1 then
+  if gpi.direction > -1 and gpi.direction < 4 then
+  if oldTBack() then
+    oldTBack()
+    if gpi.direction == 0 then
+      gpi.location[3] = gpi.location[3] + 1
+    elseif gpi.direction == 1 then
+      gpi.location[3] = gpi.location[3] - 1
+    elseif gpi.direction == 2 then
+      gpi.location[1] = gpi.location[1] + 1
+    elseif gpi.direction == 3 then
+      gpi.location[1] = gpi.location[1] - 1
+    end
+    return gpi.location[1], gpi.location[2], gpi.location[3]
+  else
+    return false
+  end
+  else
+    return false
+  end
+  else
+    return false
+  end
+end
+turtle.back = gpi.back
+oldTUp = turtle.up
+function gpi.up()
+  if turtle.getFuelLevel() == "unlimited" or turtle.getFuelLevel >= 1 then
+  if gpi.direction > -1 and gpi.direction < 4 then
+  if oldTUp() then
+    oldTUp()
+    gpi.location[2] = gpi.location[2] + 1
+    return gpi.location[1], gpi.location[2], gpi.location[3]
+  else
+    return false
+  end
+  else
+    return false
+  end
+  else
+    return false
+  end
+end
+turtle.up = gpi.up
+oldTDown = turtle.down
+function gpi.down()
+  if turtle.getFuelLevel() == "unlimited" or turtle.getFuelLevel >= 1 then
+  if gpi.direction > -1 and gpi.direction < 4 then
+  if oldTDown() then
+    oldTDown()
+    gpi.location[2] = gpi.location[2] - 1
+    return gpi.location[1], gpi.location[2], gpi.location[3]
+  else
+    return false
+  end
+  else
+    return false
+  end
+  else
+    return false
+  end
+end
+turtle.down = gpi.down
+function gpi.getDirection()
+  return gpi.direction
+end
+function gpi.setDirection(dire)
+  if not tonumber(dire) then
+    error("Error: Got "..type(dire)..". Number Or Compass Expected.")
+  end
+  if dire > -1 and dire < 4 then
+  if gpi.direction > -1 and gpi.direction < 4 then
+  while gpi.direction ~= dire do
+    gpi.turnLeft()
+  end
+  return direction
+  else
+    return false
+  end
+  else
+    return false
+  end
+end
 
 if not fs.exists("/gpi") then
   shell.run("pastebin get Yh0wCDKL /gpi")
