@@ -1,48 +1,15 @@
 -- TurtlePlus by jakemroman
 
-if not peripheral.find("modem") then
-  printError("Modem is required to run TurtlePlus")
-  return false
+if not fs.exists("/gpi") then
+  shell.run("pastebin get Yh0wCDKL /gpi")
 end
 
-if not gps.locate() then
-  printError("Unable to attain a GPS lock!")
-  return false
-end
-
-function orient()
-loc1 = vector.new(gps.locate(2, false))
-for i=1,4 do
-  if turtle.detect() then
-    turtle.turnRight()
-  else
-    break
-  end
-end
-turtle.dig()
-turtle.attack()
-turtle.forward()
-loc2 = vector.new(gps.locate(2, false))
-heading = loc2 - loc1
-turtle.back()
-return ((heading.x + math.abs(heading.x) * 2) + (heading.z + math.abs(heading.z) * 3))
-end
-
-function faceDirection(tF)
-  local f = orient()
-  repeat
-    f = f + 1
-    if f >= 5 then
-      f = 1
-    end
-    turtle.turnRight()
-  until f == tF
-end
+os.loadAPI("/gpi")
 
 function goTo(tX,tY,tZ)
-  x,y,z = gps.locate()
+  x,y,z = gpi.locate()
   if x > tX then
-    faceDirection(1)
+    gpi.setDirection(0)
     while x ~= tX do
       x = x - 1
       if turtle.detect() then
@@ -53,7 +20,7 @@ function goTo(tX,tY,tZ)
     end
   end
   if x < tX then
-    faceDirection(3)
+    gpi.setDirection(2)
     while x ~= tX do
       x = x + 1
       if turtle.detect() then
@@ -64,7 +31,7 @@ function goTo(tX,tY,tZ)
     end
   end
   if z > tZ then
-    faceDirection(2)
+    gpi.setDirection(1)
     while z ~= tZ do
       z = z - 1
       if turtle.detect() then
@@ -75,7 +42,7 @@ function goTo(tX,tY,tZ)
     end
   end
   if z < tZ then
-    faceDirection(4)
+    gpi.setDirection(3)
     while z ~= tZ do
       z = z + 1
       if turtle.detect() then
@@ -115,8 +82,8 @@ end
 
 if not fs.exists("/.turtleData") then
   turtleData = {}
-  local x,y,z = gps.locate()
-  local f = orient()
+  local x,y,z = gpi.locate()
+  local f = gpi.getDirection()
   turtleData["home"] = {
     x = x,
     y = y,
@@ -132,5 +99,5 @@ end
 
 function goHome()
   goTo(turtleData["home"]["x"],turtleData["home"]["y"],turtleData["home"]["z"])
-  faceDirection(turtleData["home"]["f"])
+  gpi.setDirection(turtleData["home"]["f"])
 end
