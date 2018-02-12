@@ -103,7 +103,7 @@ function gpi.turnLeft()
   end
 end
 turtle.turnLeft = gpi.turnLeft
-oldTRight = turtle.turnRight()
+oldTRight = turtle.turnRight
 function gpi.turnRight()
   if gpi.direction > -1 and gpi.direction < 4 then
     if gpi.direction == 0 then
