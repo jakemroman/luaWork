@@ -89,6 +89,16 @@ function goTo(tgt,rsOn)
                 rs.setOutput(dir,false)
             end
         end
+        if turtle.getFuelLevel() <= 0 then
+            print("OUT OF FUEL")
+            print("INSERT FUEL")
+            while turtle.getFuelLevel() <= 0 do
+                for z=1,16 do
+                    turtle.select(i)
+                    turtle.refuel()
+                end
+            end
+        end
         pos = pos + 1
         saveData()
         turtle.up()
