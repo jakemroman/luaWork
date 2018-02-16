@@ -165,6 +165,7 @@ function interface()
                                     term.setCursorPos(3,1)
                                     term.setTextColor(colors.green)
                                     write(input)
+                                    input = ""
                                     break
                                 end
                             end
