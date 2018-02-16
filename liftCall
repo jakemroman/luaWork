@@ -12,7 +12,7 @@ function interface()
     while true do
         tmr = os.startTimer(1)
         if inactive < 10 then
-        peripheral.find("modem").setTextScale(1)
+        peripheral.find("monitor").setTextScale(1)
         term.setBackgroundColor(colors.black)
         term.clear()
         term.setBackgroundColor(colors.lightGray)
@@ -46,9 +46,9 @@ function interface()
         write(input)
         else
         if #tostring(floor) <= 1 then
-           peripheral.find("modem").setTextScale(5)
+           peripheral.find("monitor").setTextScale(5)
         elseif #tostring(floor) >= 2 then
-           peripheral.find("modem").setTextScale(4)
+           peripheral.find("monitor").setTextScale(4)
         end
         term.setBackgroundColor(colors.black)
         term.clear()
@@ -59,6 +59,8 @@ function interface()
         e,c,x,y = os.pullEvent()
         if e == "timer" and c == tmr then
             inactive = inactive + 1
+        elseif e == "timer" and c ~= tmr then
+            os.cancelTimer(tmr)
         end
         if e == "redstone" then
             inactive = 0
