@@ -1,6 +1,7 @@
 -- Turtle Elevator Caller
 channel = 16384
 floor = 1
+inactive = 0
 native = term.native()
 term.redirect(peripheral.find("monitor"))
 peripheral.find("monitor").setTextScale(1)
@@ -9,6 +10,9 @@ modem.open(channel)
 input = ""
 function interface()
     while true do
+        tmr = os.startTimer(1)
+        if inactive < 10 then
+        peripheral.find("modem").setTextScale(1)
         term.setBackgroundColor(colors.black)
         term.clear()
         term.setBackgroundColor(colors.lightGray)
@@ -40,8 +44,24 @@ function interface()
         term.setTextColor(colors.white)
         term.setCursorPos(3,1)
         write(input)
+        else
+        if #tostring(floor) <= 1 then
+           peripheral.find("modem").setTextScale(5)
+        elseif #tostring(floor) >= 2 then
+           peripheral.find("modem").setTextScale(4)
+        end
+        term.setBackgroundColor(colors.black)
+        term.clear()
+        term.setCursorPos(1,1)
+        term.setTextColor(colors.white)
+        write(tostring(floor))
+        end
         e,c,x,y = os.pullEvent()
+        if e == "timer" and c == tmr then
+            inactive = inactive + 1
+        end
         if e == "redstone" then
+            inactive = 0
             modem.transmit(channel,1,{
                 ["elevator"] = true,
                 ["command"] = "toFloor",
@@ -49,6 +69,7 @@ function interface()
             })
         end
         if e == "monitor_touch" then
+            inactive = 0
         if y == 2 then
             if x == 3 then
                 term.setCursorPos(3,2)
