@@ -1,0 +1,156 @@
+-- Turtle Elevator Main
+turtle.refuel()
+channel = 16384
+modem = peripheral.find("modem")
+alt = 0
+pos = 0
+dir = "front"
+door = "left"
+floors = {
+    [-1] = -10,
+    [1] = 0,
+    [2] = 5,
+    [3] = 10,
+    [4] = 15,
+    [5] = 20,
+}
+function saveData()
+    f = fs.open("/.data","w")
+    f.writeLine(tostring(alt))
+    f.writeLine(tostring(pos))
+    f.close()
+end
+if fs.exists("/.data") then
+    f = fs.open("/.data","r")
+    alt = tonumber(f.readLine())
+    pos = tonumber(f.readLine())
+    f.close()
+else
+    saveData()
+end
+function displayData()
+    term.clear()
+    term.setCursorPos(1,1)
+    print("Car: "..tostring(alt))
+    print("POS: "..tostring(pos))
+    print("Fuel: "..tostring(turtle.getFuelLevel()))
+end
+function toLevel(lvl)
+    if door then
+        rs.setOutput(door,false)
+    end
+    dif = lvl-alt
+    if turtle.getFuelLevel() <= (dif*3)+8 then
+        return false
+    end
+    while dif > 0 do
+        goTo(alt,true)
+        rs.setOutput(dir,true)
+        sleep(0.1)
+        rs.setOutput(dir,false)
+        goTo(alt+2)
+        rs.setOutput(dir,true)
+        sleep(0.1)
+        rs.setOutput(dir,false)
+        goTo(alt+1)
+        alt = alt + 1
+        dif = dif - 1
+    end
+    while dif < 0 do
+        goTo(alt+7,true)
+        rs.setOutput(dir,true)
+        sleep(0.1)
+        rs.setOutput(dir,false)
+        goTo(alt+5)
+        rs.setOutput(dir,true)
+        sleep(0.1)
+        rs.setOutput(dir,false)
+        alt = alt - 1
+        dif = dif + 1
+    end
+    displayData()
+    saveData()
+    if door then
+        goTo(alt+4,true)
+        rs.setOutput(dir,true)
+        rs.setOutput(door,true)
+    end
+    displayData()
+    saveData()
+end
+function goTo(tgt,rsOn)
+    displayData()
+    dis = tgt-pos
+    while dis > 0 do
+        if rsOn then
+            if pos == alt+3 or pos == alt+4 then
+                rs.setOutput(dir,true)
+            else
+                rs.setOutput(dir,false)
+            end
+        end
+        pos = pos + 1
+        saveData()
+        turtle.up()
+        dis = dis - 1
+    end
+    while dis < 0 do
+        if rsOn then
+            if pos == alt+3 or pos == alt+4 then
+                rs.setOutput(dir,true)
+            else
+                rs.setOutput(dir,false)
+            end
+        end
+        pos = pos - 1
+        saveData()
+        turtle.down()
+        dis = dis + 1
+    end
+end
+modem.open(channel)
+queue = {}
+for i,v in pairs(floors) do
+    queue[i] = false
+end
+function msgHandler()
+while true do
+    e,s,c,r,m = os.pullEvent("modem_message")
+    if type(m) == "table" then
+        if m.elevator then
+            cmd = m.command
+            param = m.param
+            if cmd == "toFloor" then
+                if floors[param] then
+                    modem.transmit(channel,channel,{
+                        ["elevator"] = true,
+                        ["response"] = "queue",
+                        ["fuel"] = turtle.getFuelLevel(),
+                    })
+                    queue[param] = true
+                    os.queueEvent("moveLift")
+                end
+            end
+        end
+    end
+end
+end
+function moveHandler()
+while true do
+    os.pullEvent()
+    sleep(1)
+    for i,v in pairs(queue) do
+        if v then
+            toLevel(floors[i])
+            modem.transmit(channel,channel,{
+                ["elevator"] = true,
+                ["response"] = "arrived",
+                ["param"] = i, 
+            })
+            queue[i] = false
+            sleep(3)
+        end
+    end
+end
+end
+parallel.waitForAny(moveHandler,msgHandler)
