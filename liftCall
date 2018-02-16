@@ -42,7 +42,7 @@ function interface()
         write(input)
         e,c,x,y = os.pullEvent()
         if e == "redstone" then
-            modem.transmit(channel,floor,{
+            modem.transmit(channel,1,{
                 ["elevator"] = true,
                 ["command"] = "toFloor",
                 ["param"] = floor,
@@ -121,7 +121,7 @@ function interface()
             input = ""
         end
         if x == 6 and y >= 2 and y <= 4 then
-            modem.transmit(channel,floor,{
+            modem.transmit(channel,1,{
                 ["elevator"] = true,
                 ["command"] = "toFloor",
                 ["param"] = tonumber(input),
