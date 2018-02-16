@@ -40,7 +40,7 @@ function toLevel(lvl)
         rs.setOutput(door,false)
     end
     dif = lvl-alt
-    if turtle.getFuelLevel() <= (dif*3)+8 then
+    if turtle.getFuelLevel() <= (dif*4)+8 then
         return false
     end
     while dif > 0 do
