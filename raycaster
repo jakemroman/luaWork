@@ -1,0 +1,257 @@
+dir = fs.getDir(shell.getRunningProgram()).."/"
+blittleEnabled = true
+function fillBox(x1,y1,x2,y2,col)
+  win.setBackgroundColor(col)
+  for x=x1,x2 do
+    for y=y1,y2 do
+      win.setCursorPos(x,y)
+      win.write(" ")
+    end
+  end
+end
+if not fs.exists(dir.."blittle") then
+  shell.run("pastebin","get","ujchRSnU",dir.."blittle")
+end
+os.loadAPI(dir.."blittle")
+level = {}
+local native = term.native()
+nX,nY = term.getSize()
+if blittleEnabled then
+  win = (blittle.createWindow(term.current(),1,1,nX,nY,true))
+end
+function math.round(nNum)
+  return math.floor(nNum+0.5)
+end
+function loadLevel(path)
+  file = {}
+  f = fs.open(dir..path,"r")
+  line = true
+  while line do
+    line = f.readLine()
+    file[#file+1] = line
+  end
+  f.close()
+  level = {}
+  for i=1,#file[1] do
+    level[i] = {}
+  end
+  for y=1,#file do
+    for x=1,#file[y] do
+      char = string.sub(file[y],x,x)
+      if char == "0" then
+        char = colors.white
+      elseif char == "1" then
+        char = colors.orange
+      elseif char == "2" then
+        char = colors.magenta
+      elseif char == "3" then
+        char = colors.lightBlue
+      elseif char == "4" then
+        char = colors.yellow
+      elseif char == "5" then
+        char = colors.lime
+      elseif char == "6" then
+        char = colors.pink
+      elseif char == "7" then
+        char = colors.gray
+      elseif char == "8" then
+        char = colors.lightGray
+      elseif char == "9" then
+        char = colors.cyan
+      elseif char == "a" then
+        char = colors.purple
+      elseif char == "b" then
+        char = colors.blue
+      elseif char == "c" then
+        char = colors.brown
+      elseif char == "d" then
+        char = colors.green
+      elseif char == "e" then
+        char = colors.red
+      elseif char == "f" then
+        char = colors.black
+      elseif char == " " then
+        char = false
+      end
+      level[x][y] = char
+    end
+  end
+end
+loadLevel("/level1")
+xPos = 3
+yPos = 3
+yaw = 0
+rayInc = 1
+rayDist = 100
+w,h = win.getSize()
+rayDirections = {}
+yawOffset = 0
+for i=0,90 do
+  rayDirections[i] = {
+    [1] = (0)+(i/90),
+    [2] = (-1)+(i/90),
+  }
+end
+for i=90,180 do
+  rayDirections[i] = {
+    [1] = (1)-((i-90)/90),
+    [2] = (0)+((i-90)/90),
+  }
+end
+for i=180,270 do
+  rayDirections[i] = {
+    [1] = (0)-((i-180)/90),
+    [2] = (1)-((i-180)/90),
+  }
+end
+for i=270,360 do
+  rayDirections[i] = {
+    [1] = (-1)+((i-270)/90),
+    [2] = (0)-((i-270)/90),
+  }
+end
+rayShadow = true
+function castRay(rayYaw)
+  while rayYaw > 360 do
+    rayYaw = rayYaw - 360
+  end
+  while rayYaw < 0 do
+    rayYaw = rayYaw + 360
+  end
+  rayX = xPos
+  rayY = yPos
+  rayYaw = math.round(rayYaw)
+  for len=1,rayDist do
+    rayY = rayY + (rayDirections[rayYaw][2]/10)
+    rayX = rayX + (rayDirections[rayYaw][1]/10)
+    if rayShadow then
+      if not rayPixels[math.round(rayX)] then
+        rayPixels[math.round(rayX)] = {}
+      end
+      if math.round(rayX) > 0 and math.round(rayX) <= #level and math.round(rayY) > 0 and math.round(rayY) <= #level then
+        if level[math.round(rayX)][math.round(rayY)] then
+          rayPixels[math.round(rayX)][math.round(rayY)] = level[math.round(rayX)][math.round(rayY)]
+        else
+          rayPixels[math.round(rayX)][math.round(rayY)] = colors.white
+        end
+      end
+    end
+    --rayY = rayY + (rayDirections[rayYaw][2]/10)
+    --rayX = rayX + (rayDirections[rayYaw][1]/10)
+    if math.round(rayX) > 0 and math.round(rayX) <= #level and math.round(rayY) > 0 and math.round(rayY) <= #level then
+      if level[math.round(rayX)][math.round(rayY)] then
+        return len,level[math.round(rayX)][math.round(rayY)]
+      end
+    end
+  end
+  return false
+end
+xRaw = 2
+yRaw = 2
+h2 = math.round(h/2)
+fovMultiplier = 1
+fov = w/fovMultiplier
+function redraw()
+  win.setVisible(false)
+  xPos = math.round(xRaw*5)/5
+  yPos = math.round(yRaw*5)/5
+  rayPixels = {}
+  xDraw = 0
+  win.setBackgroundColor(colors.white)
+  win.clear()
+  fillBox(1,h/2,w,h+1,colors.lightGray)
+  for i=yaw-(fov/2),yaw+(fov/2),fovMultiplier do
+    size,col = castRay(math.round(i))
+    if size then
+      if size > (h*2) then
+        size = h*2
+      end
+      size = (h/2)-(size/6)
+      fillBox(xDraw,(h/2)-size,xDraw+(fovMultiplier-1),(h/2)+size,col)
+    end
+    xDraw = xDraw + fovMultiplier
+  end
+  win.setVisible(true)
+  for x=1,#level do
+    for y=1,#level[x] do
+      if level[x][y] then
+        paintutils.drawPixel(x,y,level[x][y])
+        if rayPixels[x] then
+          if rayPixels[x][y] then
+            term.setBackgroundColor(colors.lightGray)
+            term.setTextColor(rayPixels[x][y])
+            term.setCursorPos(x,y)
+            write(".")
+          end
+        end
+      else
+        paintutils.drawPixel(x,y,colors.gray)
+        if rayPixels[x] then
+          if rayPixels[x][y] then
+            term.setTextColor(rayPixels[x][y])
+            term.setCursorPos(x,y)
+            write(".")
+          end
+        end
+      end
+    end
+  end
+  term.setBackgroundColor(colors.lightBlue)
+  term.setCursorPos(xPos,yPos)
+  term.setTextColor(colors.white)
+  pointYaw = yaw + 45
+  if pointYaw >= 0 and pointYaw < 90 then
+    write("^")
+  elseif pointYaw >= 90 and pointYaw < 180 then
+    write(">")
+  elseif pointYaw >= 180 and pointYaw < 270 then
+    write("v")
+  elseif pointYaw >= 270 and pointYaw < 450 then
+    write("<")
+  end
+end
+while true do
+  if yaw > 360 then
+    yaw = 0
+  elseif yaw < 0 then
+    yaw = 360
+  end
+  redraw()
+  term.setCursorPos(1,h)
+  term.setBackgroundColor(colors.lightGray)
+  write(tostring(yaw))
+  e,k = os.pullEvent("key")
+  if k == keys.left then
+    yaw = yaw - 10
+  elseif k == keys.right then
+    yaw = yaw + 10
+  elseif k == keys.w then
+    yRaw = yRaw + rayDirections[yaw][2]/5
+    xRaw = xRaw + rayDirections[yaw][1]/5
+  elseif k == keys.s then
+    yRaw = yRaw - rayDirections[yaw][2]/5
+    xRaw = xRaw - rayDirections[yaw][1]/5
+  elseif k == keys.a then
+    if yaw > 270 then
+      yRaw = yRaw + rayDirections[yaw-90][2]/5
+      xRaw = xRaw + rayDirections[yaw-90][1]/5
+    else
+      yRaw = yRaw - rayDirections[yaw+90][2]/5
+      xRaw = xRaw - rayDirections[yaw+90][1]/5
+    end
+  elseif k == keys.d then
+    if yaw > 270 then
+      yRaw = yRaw - rayDirections[yaw-90][2]/5
+      xRaw = xRaw - rayDirections[yaw-90][1]/5
+    else
+      yRaw = yRaw + rayDirections[yaw+90][2]/5
+      xRaw = xRaw + rayDirections[yaw+90][1]/5
+    end
+  elseif k == keys.up then
+    yaw = yaw - 1
+  elseif k == keys.down then
+    yaw = yaw + 1
+  elseif k == keys.enter then
+    break
+  end
+end
