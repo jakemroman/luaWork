@@ -155,115 +155,119 @@ fovMultiplier = 1
 fov = w/fovMultiplier
 lastX = xRaw
 lastY = yRaw
-function redraw()
-  win.setVisible(false)
-  if level[math.round(xRaw)] then
-    if level[math.round(xRaw)][math.round(yRaw)] then
-      xRaw = lastX
-      yRaw = lastY
-    end
-  end
-  lastX = xRaw
-  lastY = yRaw
-  xPos = xRaw
-  yPos = yRaw
-  rayPixels = {}
-  xDraw = 0
-  win.setBackgroundColor(skyColor)
-  win.clear()
-  fillBox(1,h/2,w,h+1,groundColor)
-  for i=yaw-(fov/2),yaw+(fov/2),fovMultiplier do
-    size,col = castRay(math.round(i))
-    if size then
-      if size > (h*2) then
-        size = h*2
+function redrawRoutine()
+  while true do
+    win.setVisible(false)
+    if level[math.round(xRaw)] then
+      if level[math.round(xRaw)][math.round(yRaw)] then
+        xRaw = lastX
+        yRaw = lastY
       end
-      size = (h/2)-(size/6)
-      fillBox(xDraw,(h/2)-size,xDraw+(fovMultiplier-1),(h/2)+size,col)
     end
-    xDraw = xDraw + fovMultiplier
-  end
-  win.setVisible(true)
-  for x=1,#level do
-    for y=1,#level[x] do
-      if level[x][y] then
-        paintutils.drawPixel(x,y,level[x][y])
-        if rayPixels[x] then
-          if rayPixels[x][y] then
-            term.setBackgroundColor(colors.lightGray)
-            term.setTextColor(rayPixels[x][y])
-            term.setCursorPos(x,y)
-            write(".")
+    lastX = xRaw
+    lastY = yRaw
+    xPos = xRaw
+    yPos = yRaw
+    rayPixels = {}
+    xDraw = 0
+    win.setBackgroundColor(skyColor)
+    win.clear()
+    fillBox(1,h/2,w,h+1,groundColor)
+    for i=yaw-(fov/2),yaw+(fov/2),fovMultiplier do
+      size,col = castRay(math.round(i))
+      if size then
+        if size > (h*2) then
+          size = h*2
+        end
+        size = (h/2)-(size/6)
+        fillBox(xDraw,(h/2)-size,xDraw+(fovMultiplier-1),(h/2)+size,col)
+      end
+      xDraw = xDraw + fovMultiplier
+    end
+    win.setVisible(true)
+    for x=1,#level do
+      for y=1,#level[x] do
+        if level[x][y] then
+          paintutils.drawPixel(x,y,level[x][y])
+          if rayPixels[x] then
+            if rayPixels[x][y] then
+              term.setBackgroundColor(colors.lightGray)
+              term.setTextColor(rayPixels[x][y])
+              term.setCursorPos(x,y)
+              write(".")
+            end
+          end
+        else
+          paintutils.drawPixel(x,y,colors.gray)
+          if rayPixels[x] then
+            if rayPixels[x][y] then
+              term.setTextColor(rayPixels[x][y])
+              term.setCursorPos(x,y)
+              write(".")
+            end
           end
         end
+      end
+    end
+    term.setBackgroundColor(colors.lightBlue)
+    term.setCursorPos(xPos,yPos)
+    term.setTextColor(colors.white)
+    pointYaw = yaw + 45
+    if pointYaw >= 0 and pointYaw < 90 then
+      write("^")
+    elseif pointYaw >= 90 and pointYaw < 180 then
+      write(">")
+    elseif pointYaw >= 180 and pointYaw < 270 then
+      write("v")
+    elseif pointYaw >= 270 and pointYaw < 450 then
+      write("<")
+    end
+    os.pullEvent("redraw")
+  end
+end
+function controlRoutine()
+  while true do
+    if yaw > 360 then
+      yaw = 0
+    elseif yaw < 0 then
+      yaw = 360
+    end
+    e,k = os.pullEvent("key")
+    if k == keys.left then
+      yaw = yaw - 10
+    elseif k == keys.right then
+      yaw = yaw + 10
+    elseif k == keys.w then
+      yRaw = yRaw + rayDirections[yaw][2]/5
+      xRaw = xRaw + rayDirections[yaw][1]/5
+    elseif k == keys.s then
+      yRaw = yRaw - rayDirections[yaw][2]/5
+      xRaw = xRaw - rayDirections[yaw][1]/5
+    elseif k == keys.a then
+      if yaw > 270 then
+        yRaw = yRaw + rayDirections[yaw-90][2]/5
+        xRaw = xRaw + rayDirections[yaw-90][1]/5
       else
-        paintutils.drawPixel(x,y,colors.gray)
-        if rayPixels[x] then
-          if rayPixels[x][y] then
-            term.setTextColor(rayPixels[x][y])
-            term.setCursorPos(x,y)
-            write(".")
-          end
-        end
+        yRaw = yRaw - rayDirections[yaw+90][2]/5
+        xRaw = xRaw - rayDirections[yaw+90][1]/5
       end
+    elseif k == keys.d then
+      if yaw > 270 then
+        yRaw = yRaw - rayDirections[yaw-90][2]/5
+        xRaw = xRaw - rayDirections[yaw-90][1]/5
+      else
+        yRaw = yRaw + rayDirections[yaw+90][2]/5
+        xRaw = xRaw + rayDirections[yaw+90][1]/5
+      end
+    elseif k == keys.up then
+      rayDist = rayDist + 1
+    elseif k == keys.down then
+      rayDist = rayDist - 1
+    elseif k == keys.enter then
+      break
     end
-  end
-  term.setBackgroundColor(colors.lightBlue)
-  term.setCursorPos(xPos,yPos)
-  term.setTextColor(colors.white)
-  pointYaw = yaw + 45
-  if pointYaw >= 0 and pointYaw < 90 then
-    write("^")
-  elseif pointYaw >= 90 and pointYaw < 180 then
-    write(">")
-  elseif pointYaw >= 180 and pointYaw < 270 then
-    write("v")
-  elseif pointYaw >= 270 and pointYaw < 450 then
-    write("<")
+    os.queueEvent("redraw")
+    os.pullEvent("redraw")
   end
 end
-while true do
-  if yaw > 360 then
-    yaw = 0
-  elseif yaw < 0 then
-    yaw = 360
-  end
-  redraw()
-  term.setCursorPos(1,h)
-  term.setBackgroundColor(colors.lightGray)
-  write(tostring(yaw))
-  e,k = os.pullEvent("key")
-  if k == keys.left then
-    yaw = yaw - 10
-  elseif k == keys.right then
-    yaw = yaw + 10
-  elseif k == keys.w then
-    yRaw = yRaw + rayDirections[yaw][2]/5
-    xRaw = xRaw + rayDirections[yaw][1]/5
-  elseif k == keys.s then
-    yRaw = yRaw - rayDirections[yaw][2]/5
-    xRaw = xRaw - rayDirections[yaw][1]/5
-  elseif k == keys.a then
-    if yaw > 270 then
-      yRaw = yRaw + rayDirections[yaw-90][2]/5
-      xRaw = xRaw + rayDirections[yaw-90][1]/5
-    else
-      yRaw = yRaw - rayDirections[yaw+90][2]/5
-      xRaw = xRaw - rayDirections[yaw+90][1]/5
-    end
-  elseif k == keys.d then
-    if yaw > 270 then
-      yRaw = yRaw - rayDirections[yaw-90][2]/5
-      xRaw = xRaw - rayDirections[yaw-90][1]/5
-    else
-      yRaw = yRaw + rayDirections[yaw+90][2]/5
-      xRaw = xRaw + rayDirections[yaw+90][1]/5
-    end
-  elseif k == keys.up then
-    rayDist = rayDist + 1
-  elseif k == keys.down then
-    rayDist = rayDist - 1
-  elseif k == keys.enter then
-    break
-  end
-end
+parallel.waitForAny(redrawRoutine,controlRoutine)
