@@ -191,14 +191,6 @@ function redrawRoutine()
         for y=1,#level[x] do
           if level[x][y] then
             paintutils.drawPixel(x,y,level[x][y])
-            if rayPixels[x] then
-              if rayPixels[x][y] then
-                term.setBackgroundColor(colors.lightGray)
-                term.setTextColor(rayPixels[x][y])
-                term.setCursorPos(x,y)
-                write("*")
-              end
-            end
           else
             paintutils.drawPixel(x,y,colors.gray)
             if rayPixels[x] then
