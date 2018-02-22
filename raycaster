@@ -1,5 +1,6 @@
 dir = fs.getDir(shell.getRunningProgram()).."/"
 blittleEnabled = true
+miniMap = true
 function fillBox(x1,y1,x2,y2,col)
   win.setBackgroundColor(col)
   for x=x1,x2 do
@@ -185,42 +186,44 @@ function redrawRoutine()
       xDraw = xDraw + fovMultiplier
     end
     win.setVisible(true)
-    for x=1,#level do
-      for y=1,#level[x] do
-        if level[x][y] then
-          paintutils.drawPixel(x,y,level[x][y])
-          if rayPixels[x] then
-            if rayPixels[x][y] then
-              term.setBackgroundColor(colors.lightGray)
-              term.setTextColor(rayPixels[x][y])
-              term.setCursorPos(x,y)
-              write(".")
+    if minimap then
+      for x=1,#level do
+        for y=1,#level[x] do
+          if level[x][y] then
+            paintutils.drawPixel(x,y,level[x][y])
+            if rayPixels[x] then
+              if rayPixels[x][y] then
+                term.setBackgroundColor(colors.lightGray)
+                term.setTextColor(rayPixels[x][y])
+                term.setCursorPos(x,y)
+                write("*")
+              end
             end
-          end
-        else
-          paintutils.drawPixel(x,y,colors.gray)
-          if rayPixels[x] then
-            if rayPixels[x][y] then
-              term.setTextColor(rayPixels[x][y])
-              term.setCursorPos(x,y)
-              write(".")
+          else
+            paintutils.drawPixel(x,y,colors.gray)
+            if rayPixels[x] then
+              if rayPixels[x][y] then
+                term.setTextColor(rayPixels[x][y])
+                term.setCursorPos(x,y)
+                write("*")
+              end
             end
           end
         end
       end
-    end
-    term.setBackgroundColor(colors.lightBlue)
-    term.setCursorPos(xPos,yPos)
-    term.setTextColor(colors.white)
-    pointYaw = yaw + 45
-    if pointYaw >= 0 and pointYaw < 90 then
-      write("^")
-    elseif pointYaw >= 90 and pointYaw < 180 then
-      write(">")
-    elseif pointYaw >= 180 and pointYaw < 270 then
-      write("v")
-    elseif pointYaw >= 270 and pointYaw < 450 then
-      write("<")
+      term.setBackgroundColor(colors.lightBlue)
+      term.setCursorPos(xPos,yPos)
+      term.setTextColor(colors.white)
+      pointYaw = yaw + 45
+      if pointYaw >= 0 and pointYaw < 90 then
+        write("^")
+      elseif pointYaw >= 90 and pointYaw < 180 then
+        write(">")
+      elseif pointYaw >= 180 and pointYaw < 270 then
+        write("v")
+      elseif pointYaw >= 270 and pointYaw < 450 then
+        write("<")
+      end
     end
     os.pullEvent("redraw")
   end
