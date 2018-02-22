@@ -16,6 +16,8 @@ os.loadAPI(dir.."blittle")
 level = {}
 local native = term.native()
 nX,nY = term.getSize()
+skyColor = colors.white
+groundColor = colors.gray
 if blittleEnabled then
   win = (blittle.createWindow(term.current(),1,1,nX,nY,true))
 end
@@ -146,20 +148,30 @@ function castRay(rayYaw)
   end
   return false
 end
-xRaw = 2
-yRaw = 2
+xRaw = 3
+yRaw = 3
 h2 = math.round(h/2)
 fovMultiplier = 1
 fov = w/fovMultiplier
+lastX = xRaw
+lastY = yRaw
 function redraw()
   win.setVisible(false)
-  xPos = math.round(xRaw*5)/5
-  yPos = math.round(yRaw*5)/5
+  if level[math.round(xRaw)] then
+    if level[math.round(xRaw)][math.round(yRaw)] then
+      xRaw = lastX
+      yRaw = lastY
+    end
+  end
+  lastX = xRaw
+  lastY = yRaw
+  xPos = xRaw
+  yPos = yRaw
   rayPixels = {}
   xDraw = 0
-  win.setBackgroundColor(colors.white)
+  win.setBackgroundColor(skyColor)
   win.clear()
-  fillBox(1,h/2,w,h+1,colors.lightGray)
+  fillBox(1,h/2,w,h+1,groundColor)
   for i=yaw-(fov/2),yaw+(fov/2),fovMultiplier do
     size,col = castRay(math.round(i))
     if size then
@@ -248,9 +260,9 @@ while true do
       xRaw = xRaw + rayDirections[yaw+90][1]/5
     end
   elseif k == keys.up then
-    yaw = yaw - 1
+    rayDist = rayDist + 1
   elseif k == keys.down then
-    yaw = yaw + 1
+    rayDist = rayDist - 1
   elseif k == keys.enter then
     break
   end
