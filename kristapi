@@ -7,6 +7,31 @@
 
 url = "https://krist.ceriat.net/"
 
+--[[ CommonMeta API ]]--
+
+local domainMatch = "^([%l%d-]*)@?([%l%d-]+).kst$"
+local commonMetaMatch = "^(.+)=(.+)$"
+ 
+function parseMeta(meta)
+  local tbl = {meta={}}
+ 
+  for m in meta:gmatch("[^;]+") do
+    if m:match(domainMatch) then
+      local p1, p2 = m:match("([%l%d-]*)@"), m:match("@?([%l%d-]+).kst")
+      tbl.name = p1
+      tbl.domain = p2
+    elseif m:match(commonMetaMatch) then
+      local p1, p2 = m:match(commonMetaMatch)
+ 
+      tbl.meta[p1] = p2
+    else
+      table.insert(tbl.meta, m)
+    end
+  end
+  
+  return tbl
+end
+
 --[[ SHA256 API ]]--
 
 local MOD = 2^32
